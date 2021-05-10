@@ -1,6 +1,6 @@
 import os
 
-from sqlalchemy import create_engine, insert, select
+from sqlalchemy import create_engine, insert, select, or_, and_, not_
 
 from create_tables_core import customers, items, orders, order_lines
 
@@ -32,7 +32,7 @@ print(insert_data)
 print(insert_data.compile().params)
 
 # insert data to table customers
-conn.execute(insert_data)
+# conn.execute(insert_data)
 
 # Next way to create insert statement is to use insert() function from
 # the sqlalchemy package.
@@ -45,10 +45,9 @@ insert_data1 = insert(customers).values(
     town='Kiev',
 )
 
-conn.execute(insert_data1)
+# conn.execute(insert_data1)
 
 # Multiple Inserts
-
 data = [
     {
         'first_name': 'Larisa',
@@ -67,11 +66,10 @@ data = [
         'town': 'Kiev'
     },
 ]
-#
+
 insert_data2 = insert(customers)
 
-conn.execute(insert_data2, data)
-
+# conn.execute(insert_data2, data)
 
 items_list = [
     {
@@ -161,16 +159,16 @@ order_line_list = [
     },
 ]
 
-conn.execute(insert(items), items_list)
-conn.execute(insert(orders), order_list)
-conn.execute(insert(order_lines), order_line_list)
+# conn.execute(insert(items), items_list)
+# conn.execute(insert(orders), order_list)
+# conn.execute(insert(order_lines), order_line_list)
 
 
 # select * from customers
 # first method:
 select_query = customers.select()
 result = conn.execute(select_query).fetchall()
-# or fetchone() for one record from table;
+# fetchone() for one record from table;
 # fetchmany(size) etch the specified number of rows from the result set;
 # first() fetch the first row from the result set;
 # rowcount returns the number of rows in the result set;
@@ -178,3 +176,102 @@ result = conn.execute(select_query).fetchall()
 
 # second method:
 select_query1 = select([customers])
+result1 = conn.execute(select_query1).fetchall()
+
+# filtering records
+select_filter = select([items]).where(items.c.cost_price > 60)
+result_filter = conn.execute(select_filter).fetchall()
+
+# Bitwise Operators &(and_), |(or_) and ~(not_) allow us to connect conditions
+# with SQL AND, OR and NOT operators respectively.
+
+# AND
+filter_select = select([items]).where(
+    items.c.selling_price - items.c.cost_price > 20
+).where(
+    items.c.quantity > 9
+)
+# or
+filter_select1 = select([items]).where(
+    (items.c.selling_price - items.c.cost_price > 20) &
+    (items.c.quantity > 9)
+)
+# or
+filter_select2 = select([items]).where(
+    and_(
+        items.c.selling_price - items.c.cost_price > 20,
+        items.c.quantity > 9,
+    )
+)
+
+# OR
+select_or = select([items]).where(
+    (items.c.quantity > 5) | (items.c.cost_price > 100)
+)
+# or
+select_or1 = select([items]).where(
+    or_(
+        items.c.quantity > 5,
+        items.c.cost_price > 100,
+    )
+)
+
+# NOT
+select_not = select([items]).where(
+    items.c.cost_price > 100,
+    ~(items.c.quantity >= 9),
+)
+# or
+select_not1 = select([items]).where(
+    items.c.cost_price > 100,
+    not_(items.c.quantity >= 9),
+)
+
+# select with IN
+customers_select = select([customers]).where(
+    customers.c.first_name.in_(['Alexandr', 'Larisa'])
+)
+# select with NOT IN
+customers_select1 = select([customers]).where(
+    customers.c.last_name.notin_(['Pokrovskiy', 'Vasuchenko'])
+)
+# select with BETWEEN
+select_between = select([items]).where(
+    items.c.cost_price.between(50, 120)
+)
+# select with NOT BETWEEN
+select_notbetween = select([items]).where(
+    not_(items.c.selling_price.between(50, 120))
+)
+# select with LIKE
+select_name_a = select([customers]).where(
+    customers.c.first_name.like('A%')
+)  # can use ilike() for case-insensitive match
+# select with NOT LIKE
+select_name_another = select([customers]).where(
+    not_(customers.c.first_name.ilike('a%'))
+)
+# select with ORDER BY
+order_by = select([items]).order_by(items.c.cost_price)  # can using asc() or
+# desc() from sqlalchemy core inside order_by
+
+# limit select
+limit_select = select([customers]).limit(3)
+
+# limit columns
+limit_columns = select([
+    customers.c.first_name,
+    customers.c.last_name
+]).where(
+    customers.c.first_name.ilike('a%')
+)
+
+# can assign a label to a column or expression using the label() method
+sale_price = select([
+    items.c.name,
+    items.c.cost_price,
+    items.c.selling_price,
+    (items.c.selling_price * 0.9).label('new_price')
+]).where(
+    items.c.quantity > 5
+)
