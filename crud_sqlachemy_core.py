@@ -1,6 +1,7 @@
 import os
 
 from sqlalchemy import create_engine, insert, select, or_, and_, not_
+from sqlalchemy.sql import func
 
 from create_tables_core import customers, items, orders, order_lines
 
@@ -275,3 +276,60 @@ sale_price = select([
 ]).where(
     items.c.quantity > 5
 )
+
+# To access the built-in functions provided by the database we use func object.
+func_list = [
+    #  date/time functions
+    func.timeofday(),
+    func.localtime(),
+    func.current_timestamp(),
+    func.date_part('month', func.now()),
+    func.now(),
+    #  mathematical functions
+    func.pow(4, 2),
+    func.sqrt(441),
+    func.pi(),
+    func.floor(func.pi()),
+    func.ceil(func.pi()),
+    #  string functions
+    func.lower('TEXT'),
+    func.upper('text'),
+    func.length('text'),
+    func.trim('  tex t  '),
+    func.chr(97),
+]
+
+select_funcs = select(func_list)
+res = conn.execute(select_funcs).fetchall()
+
+# access to aggregate functions via the func object
+calculations = [
+    func.sum(items.c.quantity),
+    func.avg(items.c.selling_price),
+    func.max(items.c.selling_price),
+    func.min(items.c.selling_price),
+    func.count(customers.c.id),
+]
+
+select_calc = select(calculations)
+res_calc = conn.execute(select_calc).fetchall()
+
+# GROUP BY
+params = [
+    func.count('*').label('count'),
+    customers.c.town,
+]
+select_c_group_by = select(params).group_by(customers.c.town)
+res_group_by = conn.execute(select_c_group_by).fetchall()
+
+# GROUP BY with HAVING
+params = [
+    func.count('*').label('count'),
+    customers.c.town,
+]
+select_c_group_by_h = select(params).group_by(customers.c.town).having(
+    func.count('*') > 2
+)
+res_group_by_h = conn.execute(select_c_group_by_h).fetchall()
+
+# JOINS
