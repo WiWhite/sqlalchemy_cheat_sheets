@@ -37,7 +37,6 @@ class Order(Base):
     line_items = relationship('OrderLine', secondary='order_lines',
                               backref='order')
 
-
 class OrderLine(Base):
     __tablename__ = 'order_lines'
     id = Column(Integer(), primary_key=True)
@@ -46,11 +45,11 @@ class OrderLine(Base):
     quantity = Column(SmallInteger())
     item = relationship('Item')
 
-
-user = os.environ['psql_admin']
-passwd = os.environ['psql_passwd']
-engine = create_engine(
-    f'postgresql+psycopg2://{user}:{passwd}@localhost/postgres',
-    echo=True,
-)
-Base.metadata.create_all(engine)
+if __name__ == '__main__':
+    user = os.environ['psql_admin']
+    passwd = os.environ['psql_passwd']
+    engine = create_engine(
+        f'postgresql+psycopg2://{user}:{passwd}@localhost/postgres',
+        echo=True,
+    )
+    Base.metadata.create_all(engine)
