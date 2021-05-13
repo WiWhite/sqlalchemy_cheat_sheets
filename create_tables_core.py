@@ -10,7 +10,7 @@ passwd = os.environ['psql_passwd']
 
 metadata = MetaData()
 engine = create_engine(
-    f'postgresql+psycopg2://{user}:{passwd}@localhost/sqlalchemy',
+    f'postgresql+psycopg2://{user}:{passwd}@localhost/postgres',
     echo=True,
 )
 

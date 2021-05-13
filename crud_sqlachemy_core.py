@@ -2,6 +2,8 @@ import os
 
 from sqlalchemy import create_engine, insert, select, or_, and_, not_
 from sqlalchemy.sql import func
+from sqlalchemy import update
+from sqlalchemy import delete
 
 from create_tables_core import customers, items, orders, order_lines
 
@@ -9,7 +11,7 @@ user = os.environ['psql_admin']
 passwd = os.environ['psql_passwd']
 
 engine = create_engine(
-    f'postgresql+psycopg2://{user}:{passwd}@localhost/sqlalchemy',
+    f'postgresql+psycopg2://{user}:{passwd}@localhost/postgres',
     echo=True,
 )
 
@@ -333,3 +335,52 @@ select_c_group_by_h = select(params).group_by(customers.c.town).having(
 res_group_by_h = conn.execute(select_c_group_by_h).fetchall()
 
 # JOINS
+select_join = select([
+    customers.c.first_name,
+    customers.c.last_name,
+    orders.c.id,
+    orders.c.date_placed,
+]).select_from(orders.join(customers)).where(
+    (customers.c.first_name == 'Larisa') &
+    (customers.c.last_name == 'Vasuchenko')
+)
+res_join = conn.execute(select_join).fetchall()
+
+select_join1 = select([
+    orders.c.id.label('order_id'),
+    orders.c.date_placed,
+    order_lines.c.quantity,
+    items.c.name,
+]).select_from(
+    orders.join(customers).join(order_lines).join(items)
+).where(
+    and_(
+        customers.c.first_name == 'Larisa',
+        customers.c.last_name == 'Vasuchenko',
+    )
+)
+res_join1 = conn.execute(select_join1).fetchall()
+
+# outer join
+select_o_join = select([
+    customers.c.first_name,
+    orders.c.id,
+]).select_from(
+    customers.outerjoin(orders)
+)
+
+res_o_join = conn.execute(select_o_join).fetchall()
+
+# UPDATING RECORDS
+update_customers = update(customers).where(
+    customers.c.town == 'Kiev'
+).values(
+    address='16/1 Azerbaydjanskaya st.'
+)
+# conn.execute(update_customers)
+
+# DELETING RECORDS
+delete_items = delete(items).where(
+    items.c.id == 4
+)
+# conn.execute(delete_items)
