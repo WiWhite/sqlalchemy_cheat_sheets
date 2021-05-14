@@ -71,7 +71,51 @@ customer7 = Customer(
     address='12 Poltavskaya st.',
     town='Irpen',
 )
+# insert records to Customer model
 customers = [customer1, customer2, customer3, customer4, customer5,
              customer6, customer7]
-session.add_all(customers)
-session.commit()
+# session.add_all(customers)
+# session.commit()
+
+item1 = Item(name='Desk', cost_price=99.21, selling_price=100.81, quantity=5)
+item2 = Item(name='Pen', cost_price=4.45, selling_price=5.51, quantity=12)
+item3 = Item(name='Headphone', cost_price=15.52, selling_price=6.81,
+             quantity=50)
+item4 = Item(name='Travel Bag', cost_price=20.1, selling_price=24.21,
+             quantity=50)
+item5 = Item(name='Keyboard', cost_price=20.1, selling_price=22.11,
+             quantity=50)
+item6 = Item(name='Monitor', cost_price=200.14, selling_price=212.89,
+             quantity=50)
+item7 = Item(name='Watch', cost_price=100.58, selling_price=104.41,
+             quantity=50)
+item8 = Item(name='Water Bottle', cost_price=20.89, selling_price=25,
+             quantity=50)
+# insert records to Item model
+# session.add_all([item1, item2, item3, item4, item5, item6, item7, item8])
+# session.commit()
+
+order1 = Order(customer=customer1)
+order2 = Order(customer=customer2)
+order3 = Order(customer=customer3)
+
+line_item1 = OrderLine(order=order1, item=item1, quantity=3)
+line_item2 = OrderLine(order=order1, item=item2, quantity=2)
+line_item3 = OrderLine(order=order2, item=item1, quantity=1)
+line_item4 = OrderLine(order=order2, item=item2, quantity=4)
+line_item5 = OrderLine(order=order3, item=item1, quantity=1)
+line_item6 = OrderLine(order=order3, item=item2, quantity=4)
+
+# insert records to Order and OrderLine models
+# session.add_all([order1, order2, order3])
+# session.commit()
+
+# select * from customers
+customers_all = session.query(Customer).all()
+
+# select * from items
+items = session.query(Item).all()
+
+# select * from orders
+orders = session.query(Order).all()
+
