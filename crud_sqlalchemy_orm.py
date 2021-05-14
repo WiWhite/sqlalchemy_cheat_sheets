@@ -1,7 +1,7 @@
 import os
 
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, and_, or_, not_
 
 from models import Customer, Item, Order, OrderLine
 
@@ -119,3 +119,53 @@ items = session.query(Item).all()
 # select * from orders
 orders = session.query(Order).all()
 
+# count records in tables
+count_customers = session.query(Customer).count()
+count_items = session.query(Item).count()
+count_orders = session.query(Order).count()
+
+# select first record from table
+first_customer = session.query(Customer).first()
+
+# select record using get(primary key:int)
+customer_2 = session.query(Customer).get(2)
+
+# select * from customers where customers.town == 'Kiev'
+customers_from_kiev = session.query(Customer).filter(
+    Customer.town == 'Kiev'
+).all()
+
+# select * from customers where customers.town == 'Kiev' or customers.town == 'Irpen'
+cust_from_kiev_irpen = session.query(Customer).filter(or_(
+    Customer.town == 'Kiev',
+    Customer.town == 'Irpen',
+)).all()
+
+# select * from customers where customers.first_name in ('Alexandr', 'Oleg')
+customers_in = session.query(Customer).filter(
+    Customer.first_name.in_(
+        ['Alexandr', 'Oleg']
+    )
+).all()
+
+# select * from customers where customers.first_name not in ('Alexandr', 'Oleg')
+customers_not_in = session.query(Customer).filter(
+    Customer.first_name.notin_(
+        ['Alexandr', 'Oleg']
+    )
+).all()
+
+# select first_name, second_name from customers where id between(2, 5)
+customers_between = session.query(Customer).filter(
+    Customer.id.between(2, 5)
+).all()
+
+# select first_name, second_name from customers where id not between(2, 5)
+customers_not_between = session.query(Customer).filter(
+    not_(Customer.id.between(2, 5))
+).all()
+
+# select * from customers where first_name like 'A%'
+customers_like = session.query(Customer).filter(
+    Customer.first_name.like('A%')
+).all()
