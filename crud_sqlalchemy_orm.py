@@ -169,3 +169,16 @@ customers_not_between = session.query(Customer).filter(
 customers_like = session.query(Customer).filter(
     Customer.first_name.like('A%')
 ).all()
+
+# select * from items order by items.cost_price
+sort_items = session.query(Item).order_by(Item.cost_price).all()
+
+# SELECT * FROM customers JOIN orders ON customers.id = orders.customer_id
+inner_join = session.query(Customer).join(Order).all()
+
+# left outer join
+outer_join = session.query(
+    Customer.first_name,
+    Customer.last_name,
+    Order.id
+).outerjoin(Order).all()
